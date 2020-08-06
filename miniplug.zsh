@@ -4,6 +4,7 @@
 
 # Globals
 declare MINIPLUG_HOME="${MINIPLUG_HOME:-$HOME/.miniplug}"
+declare MINIPLUG_THEME="${MINIPLUG_THEME:-}"
 declare MINIPLUG_PLUGINS=()
 
 # Helper functions {{{
@@ -17,6 +18,7 @@ function __miniplug_usage() {
   echo "Usage: miniplug <command> [arguments]"
   echo "Commands:"
   echo "  plugin - Register a plugin"
+  echo "  theme - Register a theme (can be done only once)"
   echo "  install - Install plugins"
   echo "  help - Show this message"
 }
@@ -26,6 +28,20 @@ function __miniplug_plugin() {
   local plugin_url="$1"
 
   MINIPLUG_PLUGINS+=("$plugin_url")
+}
+
+# Register a theme
+function __miniplug_theme() {
+  local theme_url="$1"
+
+  # Throw an error if theme is already set but not if MINIPLUG_THEME and new theme match
+  if [ -n "$MINIPLUG_THEME" ] && [ "$MINIPLUG_THEME" != "$theme_url" ]; then
+    echo "Theme is already set"
+    return 1
+  fi
+
+  MINIPLUG_PLUGINS+=("$theme_url")
+  MINIPLUG_THEME="$theme_url"
 }
 
 # Install plugins
@@ -71,6 +87,7 @@ function __miniplug_install() {
 function miniplug() {
   case "$1" in
     plugin) __miniplug_plugin "$2" ;;
+    theme) __miniplug_theme "$2" ;;
     install) __miniplug_install ;;
     help) __miniplug_usage ;;
     *) __miniplug_usage ;;
