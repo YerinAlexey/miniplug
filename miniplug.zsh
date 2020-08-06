@@ -8,7 +8,13 @@ declare MINIPLUG_THEME="${MINIPLUG_THEME:-}"
 declare MINIPLUG_PLUGINS=()
 
 # Helper functions {{{
+# Friendly wrapper around find
+function __miniplug_find() {
+  local searchdir="$1"
+  local searchterm="$2"
 
+  find "$searchdir" -maxdepth 1 -type f -name "$searchterm"
+}
 # }}}
 
 # Core functions {{{
@@ -84,6 +90,52 @@ function __miniplug_install() {
     )
   done
 }
+
+# Load plugins
+function __miniplug_load() {
+  local plugin_url plugin_name plugin_location source_zsh_plugin source_dotzsh source_zsh_theme
+
+  # Make sure MINIPLUG_HOME exists
+  mkdir -p "$MINIPLUG_HOME"
+
+  for plugin_url in ${MINIPLUG_PLUGINS[*]}; do
+    # Get plugin name (last two URL segments)
+    plugin_name="$(echo "$plugin_url" | awk -F '/' '{ print $(NF - 1) "/" $NF }')"
+
+    # Where this plugin is located
+    plugin_location="$MINIPLUG_HOME/$plugin_name"
+
+    # Check if plugin is installed
+    if [ ! -d "$plugin_location" ]; then
+      echo "$plugin_url is not installed, run 'miniplug install' to install it"
+      continue
+    fi
+
+    # 1st source - .plugin.zsh file
+    source_zsh_plugin="$(__miniplug_find "$plugin_location" "*.plugin.zsh")"
+
+    [ -n "$source_zsh_plugin" ] && source "$source_zsh_plugin" && continue
+
+    # 2nd source - .zsh file
+    source_dotzsh="$(__miniplug_find "$plugin_location" "*.zsh")"
+
+    [ -n "$source_dotzsh" ] && source "$source_dotzsh" && continue
+
+    # 3rd source - .zsh-theme file (only for themes)
+    if [ "$MINIPLUG_THEME" = "$plugin_url" ]; then
+      source_zsh_theme="$(__miniplug_find "$plugin_location" "*.zsh-theme")"
+
+      [ -n "$source_zsh_theme" ] && source "$source_zsh_theme" && continue
+    fi
+
+    # If none of sources has been found
+    if [ "$MINIPLUG_THEME" = "$plugin_url" ]; then
+      echo "No .zsh-theme, .plugin.zsh or .zsh file found, most likely, $plugin_url is not a valid ZSH theme"
+    else
+      echo "No .plugin.zsh or .zsh file found, most likely, $plugin_url is not a valid ZSH plugin"
+    fi
+  done
+}
 # }}}
 
 # Wrapper command for core functions
@@ -92,6 +144,7 @@ function miniplug() {
     plugin) __miniplug_plugin "$2" ;;
     theme) __miniplug_theme "$2" ;;
     install) __miniplug_install ;;
+    load) __miniplug_load ;;
     help) __miniplug_usage ;;
     *) __miniplug_usage ;;
   esac
