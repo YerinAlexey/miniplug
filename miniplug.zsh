@@ -7,6 +7,8 @@ declare MINIPLUG_HOME="${MINIPLUG_HOME:-$HOME/.miniplug}"
 declare MINIPLUG_THEME="${MINIPLUG_THEME:-}"
 declare MINIPLUG_PLUGINS=()
 
+[ -z "$MINIPLUG_LOADED_PLUGINS" ] && declare MINIPLUG_LOADED_PLUGINS=()
+
 # Helper functions {{{
 # Friendly wrapper around find
 function __miniplug_find() {
@@ -14,6 +16,17 @@ function __miniplug_find() {
   local searchterm="$2"
 
   find "$searchdir" -maxdepth 1 -type f -name "$searchterm"
+}
+
+# Check if plugin is already loaded
+function __miniplug_check_loaded() {
+  local target_plugin="$1" plugin_url
+
+  for plugin_url in ${MINIPLUG_LOADED_PLUGINS[*]}; do
+    [ "$target_plugin" = "$plugin_url" ] && return
+  done
+
+  return 1
 }
 # }}}
 
@@ -111,21 +124,39 @@ function __miniplug_load() {
       continue
     fi
 
+    # Check if plugin is already loaded
+    __miniplug_check_loaded "$plugin_url" && continue
+
     # 1st source - .plugin.zsh file
     source_zsh_plugin="$(__miniplug_find "$plugin_location" "*.plugin.zsh")"
 
-    [ -n "$source_zsh_plugin" ] && source "$source_zsh_plugin" && continue
+    if [ -n "$source_zsh_plugin" ]; then
+      source "$source_zsh_plugin"
+      MINIPLUG_LOADED_PLUGINS+=("$plugin_url")
+
+      continue
+    fi
 
     # 2nd source - .zsh file
     source_dotzsh="$(__miniplug_find "$plugin_location" "*.zsh")"
 
-    [ -n "$source_dotzsh" ] && source "$source_dotzsh" && continue
+    if [ -n "$source_dotzsh" ]; then
+      source "$source_dotzsh"
+      MINIPLUG_LOADED_PLUGINS+=("$plugin_url")
+
+      continue
+    fi
 
     # 3rd source - .zsh-theme file (only for themes)
     if [ "$MINIPLUG_THEME" = "$plugin_url" ]; then
       source_zsh_theme="$(__miniplug_find "$plugin_location" "*.zsh-theme")"
 
-      [ -n "$source_zsh_theme" ] && source "$source_zsh_theme" && continue
+      if [ -n "$source_zsh_theme" ]; then
+        source "$source_zsh_theme"
+        MINIPLUG_LOADED_PLUGINS+=("$plugin_url")
+
+        continue
+      fi
     fi
 
     # If none of sources has been found
