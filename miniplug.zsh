@@ -17,10 +17,13 @@ function __miniplug_usage() {
   echo "Miniplug - minimalistic plugin manager for ZSH"
   echo "Usage: miniplug <command> [arguments]"
   echo "Commands:"
-  echo "  plugin - Register a plugin"
-  echo "  theme - Register a theme (can be done only once)"
+  echo "  plugin <source> - Register a plugin"
+  echo "  theme <source> - Register a theme (can be done only once)"
   echo "  install - Install plugins"
   echo "  help - Show this message"
+  echo "About <source>:"
+  echo "  <source> can be either full URL to Git repository or Github's user/repo"
+  echo "  Examples: https://gitlab.com/user/repo, zsh-users/repo (expanded to https://github.com/zsh-users/repo)"
 }
 
 # Register a plugin
