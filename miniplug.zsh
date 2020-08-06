@@ -17,6 +17,7 @@ function __miniplug_usage() {
   echo "Usage: miniplug <command> [arguments]"
   echo "Commands:"
   echo "  plugin - Register a plugin"
+  echo "  install - Install plugins"
   echo "  help - Show this message"
 }
 
@@ -26,12 +27,51 @@ function __miniplug_plugin() {
 
   MINIPLUG_PLUGINS+=("$plugin_url")
 }
+
+# Install plugins
+function __miniplug_install() {
+  local plugin_url plugin_name clone_url clone_dest
+
+  # Make sure MINIPLUG_HOME exists
+  mkdir -p "$MINIPLUG_HOME"
+
+  for plugin_url in ${MINIPLUG_PLUGINS[*]}; do
+    # Get plugin name (last two URL segments)
+    plugin_name="$(echo "$plugin_url" | awk -F '/' '{ print $(NF - 1) "/" $NF }')"
+
+    # Get URL for git clone
+    clone_url="$(echo "$plugin_url" | awk -F '/' '{
+      if (match($0, /^https:\/\//)) {
+        print $0
+      } else {
+        print "https://github.com/" $0
+      }
+    }')"
+
+    # Where to clone this plugin
+    clone_dest="$MINIPLUG_HOME/$plugin_name"
+
+    # Check if plugin is already installed
+    if [ -d "$clone_dest" ]; then
+      echo "$plugin_url is already installed, skipping"
+      continue
+    fi
+
+    # Clone
+    echo "Installing $plugin_url ..."
+    git clone "$clone_url" "$clone_dest" -q || (
+      echo "Failed to install $plugin_url, exiting"
+      return 1
+    )
+  done
+}
 # }}}
 
 # Wrapper command for core functions
 function miniplug() {
   case "$1" in
     plugin) __miniplug_plugin "$2" ;;
+    install) __miniplug_install ;;
     help) __miniplug_usage ;;
     *) __miniplug_usage ;;
   esac
