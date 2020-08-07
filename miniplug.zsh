@@ -39,6 +39,7 @@ function __miniplug_usage() {
   echo "  plugin <source> - Register a plugin"
   echo "  theme <source> - Register a theme (can be done only once)"
   echo "  install - Install plugins"
+  echo "  update - Update plugins"
   echo "  help - Show this message"
   echo "About <source>:"
   echo "  <source> can be either full URL to Git repository or Github's user/repo"
@@ -101,6 +102,41 @@ function __miniplug_install() {
       echo "Failed to install $plugin_url, exiting"
       return 1
     )
+  done
+}
+
+# Update plugins
+function __miniplug_update() {
+  local plugin_url plugin_name plugin_location branch remote diffs
+
+  # Make sure MINIPLUG_HOME exists
+  mkdir -p "$MINIPLUG_HOME"
+
+  for plugin_url in ${MINIPLUG_PLUGINS[*]}; do
+    # Get plugin name (last two URL segments)
+    plugin_name="$(echo "$plugin_url" | awk -F '/' '{ print $(NF - 1) "/" $NF }')"
+
+    # Where plugin is located
+    plugin_location="$MINIPLUG_HOME/$plugin_name"
+
+    # Pull changes from remote
+    git -C "$plugin_location" remote update >/dev/null
+
+    # Get current branch and remote
+    branch="$(git -C "$plugin_location" branch --show-current)"
+    remote="$(git -C "$plugin_location" remote show)"
+
+    [ -z "$branch" ] && echo "$plugin_url: HEAD is detached, skipping" && continue
+
+    # Check the difference between remote and local branches
+    diffs="$(git -C "$plugin_location" diff "$remote/$branch")"
+
+    if [ -n "$diffs" ]; then
+      # Pull!
+      git -C "$plugin_location" pull "$remote/$branch" && echo "$plugin_url successfully updated!"
+    else
+      echo "$plugin_url is up-to-date!"
+    fi
   done
 }
 
@@ -175,6 +211,7 @@ function miniplug() {
     plugin) __miniplug_plugin "$2" ;;
     theme) __miniplug_theme "$2" ;;
     install) __miniplug_install ;;
+    update) __miniplug_update ;;
     load) __miniplug_load ;;
     help) __miniplug_usage ;;
     *) __miniplug_usage ;;
