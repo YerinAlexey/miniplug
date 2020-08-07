@@ -14,10 +14,9 @@ Minimalistic plugin manager for ZSH
 # Installation
 To install Miniplug you need to download [`miniplug.zsh`](./miniplug.zsh) file and source it in your `.zshrc`:
 ```sh
-curl 
-  -sL
-  --create-dirs
-  https://raw.githubusercontent.com/YerinAlexey/miniplug/master/miniplug.zsh
+curl \
+  -sL --create-dirs \
+  https://raw.githubusercontent.com/YerinAlexey/miniplug/master/miniplug.zsh \
   -o $HOME/.miniplug/miniplug.zsh
 
 # Add to zshrc:
@@ -32,7 +31,7 @@ utility. Define plugins using `miniplug plugin <URL>`. Or define a theme using
 > `<URL>` can be URL to Git repo or Github's `user/repo`
 
 After plugins are defined, you can download them using `miniplug install` and
-source them using `miniplug load` (should be added to `.zshrc`). 
+source them using `miniplug load` (should be added to `.zshrc`).
 
 ## Example `.zshrc`:
 ```sh
