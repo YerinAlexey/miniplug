@@ -133,7 +133,7 @@ function __miniplug_update() {
 
     if [ -n "$diffs" ]; then
       # Pull!
-      git -C "$plugin_location" pull "$remote/$branch" && echo "$plugin_url successfully updated!"
+      git -C "$plugin_location" pull "$remote" "$branch" && echo "$plugin_url successfully updated!"
     else
       echo "$plugin_url is up-to-date!"
     fi
