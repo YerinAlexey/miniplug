@@ -15,8 +15,7 @@ function __miniplug_find() {
   local searchdir="$1"
   local searchterm="$2"
 
-  find "$searchdir" -maxdepth 1 -type f -name "$searchterm" | head -n 1
-}
+  find "$searchdir" -maxdepth 1 -type f -name "$searchterm" | head -n 1 }
 
 # Check if plugin is already loaded
 function __miniplug_check_loaded() {
@@ -133,7 +132,7 @@ function __miniplug_update() {
 
     if [ -n "$diffs" ]; then
       # Pull!
-      git -C "$plugin_location" pull "$remote" "$branch" && echo "$plugin_url successfully updated!"
+      git -C -q "$plugin_location" pull "$remote" "$branch" && echo "$plugin_url successfully updated!"
     else
       echo "$plugin_url is up-to-date!"
     fi
