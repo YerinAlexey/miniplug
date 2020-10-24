@@ -16,7 +16,7 @@ To install Miniplug you need to download [`miniplug.zsh`](./miniplug.zsh) file a
 ```sh
 curl \
   -sL --create-dirs \
-  https://raw.githubusercontent.com/YerinAlexey/miniplug/master/miniplug.zsh \
+  https://codeberg.org/YerinAlexey/miniplug/raw/branch/master/miniplug.zsh \
   -o $HOME/.miniplug/miniplug.zsh
 
 # Add to zshrc:
