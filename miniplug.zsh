@@ -15,10 +15,10 @@ function __miniplug_success() {
   printf "\x1b[32m$1\x1b[0m\n"
 }
 function __miniplug_warning() {
-  printf "\x1b[33m$1\x1b[0m\n"
+  printf "[warn] \x1b[33m$1\x1b[0m\n"
 }
 function __miniplug_error() {
-  printf "\x1b[31m$1\x1b[0m\n"
+  printf "[err] \x1b[31m$1\x1b[0m\n"
 }
 
 # Friendly wrapper around find
