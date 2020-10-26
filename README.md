@@ -63,9 +63,12 @@ To update plugins you can run:
 miniplug update
 ```
 
-If you want to force plugin not to update, you can just detach `HEAD` by doing
-`git checkout <COMMIT HASH>` in plugin folder (`$MINIPLUG_HOME/user/repo`). In
-that case, plugin will be skipped when you run `miniplug update`
+If you want to force plugin not to update, you can detach repo's `HEAD` by running this snippet in plugin folder (`$MINIPLUG_HOME/user/repo`):
+```sh
+git checkout "$(git log --format=%H | head -1)"
+```
+
+After that, plugin will be skipped when you run `miniplug update`
 
 # License
 MIT, [learn more](./LICENSE)
