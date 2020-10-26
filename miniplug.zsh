@@ -109,7 +109,7 @@ function __miniplug_install() {
 
     # Clone
     printf "Installing $plugin_url ...\n"
-    git clone "$clone_url" "$clone_dest" -q || (
+    git clone "$clone_url" "$clone_dest" -q --depth 1 || (
       __miniplug_error "Failed to install $plugin_url, exiting"
       return 1
     )
