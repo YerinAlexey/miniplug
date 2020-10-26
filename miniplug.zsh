@@ -10,12 +10,24 @@ declare MINIPLUG_PLUGINS=()
 [ -z "$MINIPLUG_LOADED_PLUGINS" ] && declare MINIPLUG_LOADED_PLUGINS=()
 
 # Helper functions {{{
+# Loggers
+function __miniplug_success() {
+  printf "\x1b[32m$1\x1b[0m\n"
+}
+function __miniplug_warning() {
+  printf "\x1b[33m$1\x1b[0m\n"
+}
+function __miniplug_error() {
+  printf "\x1b[31m$1\x1b[0m\n"
+}
+
 # Friendly wrapper around find
 function __miniplug_find() {
   local searchdir="$1"
   local searchterm="$2"
 
-  find "$searchdir" -maxdepth 1 -type f -name "$searchterm" | head -n 1 }
+  find "$searchdir" -maxdepth 1 -type f -name "$searchterm" | head -n 1
+}
 
 # Check if plugin is already loaded
 function __miniplug_check_loaded() {
@@ -58,7 +70,7 @@ function __miniplug_theme() {
 
   # Throw an error if theme is already set but not if MINIPLUG_THEME and new theme match
   if [ -n "$MINIPLUG_THEME" ] && [ "$MINIPLUG_THEME" != "$theme_url" ]; then
-    echo "Theme is already set"
+    __miniplug_error "Theme is already set"
     return 1
   fi
 
@@ -75,10 +87,10 @@ function __miniplug_install() {
 
   for plugin_url in ${MINIPLUG_PLUGINS[*]}; do
     # Get plugin name (last two URL segments)
-    plugin_name="$(echo "$plugin_url" | awk -F '/' '{ print $(NF - 1) "/" $NF }')"
+    plugin_name="$(printf "$plugin_url" | awk -F '/' '{ print $(NF - 1) "/" $NF }')"
 
     # Get URL for git clone
-    clone_url="$(echo "$plugin_url" | awk -F '/' '{
+    clone_url="$(printf "$plugin_url" | awk -F '/' '{
       if (match($0, /^https:\/\//)) {
         print $0
       } else {
@@ -91,14 +103,14 @@ function __miniplug_install() {
 
     # Check if plugin is already installed
     if [ -d "$clone_dest" ]; then
-      echo "$plugin_url is already installed, skipping"
+      __miniplug_warning "$plugin_url is already installed, skipping"
       continue
     fi
 
     # Clone
-    echo "Installing $plugin_url ..."
+    printf "Installing $plugin_url ...\n"
     git clone "$clone_url" "$clone_dest" -q || (
-      echo "Failed to install $plugin_url, exiting"
+      __miniplug_error "Failed to install $plugin_url, exiting"
       return 1
     )
   done
@@ -113,7 +125,7 @@ function __miniplug_update() {
 
   for plugin_url in ${MINIPLUG_PLUGINS[*]}; do
     # Get plugin name (last two URL segments)
-    plugin_name="$(echo "$plugin_url" | awk -F '/' '{ print $(NF - 1) "/" $NF }')"
+    plugin_name="$(printf "$plugin_url" | awk -F '/' '{ print $(NF - 1) "/" $NF }')"
 
     # Where plugin is located
     plugin_location="$MINIPLUG_HOME/$plugin_name"
@@ -125,16 +137,16 @@ function __miniplug_update() {
     branch="$(git -C "$plugin_location" branch --show-current)"
     remote="$(git -C "$plugin_location" remote show)"
 
-    [ -z "$branch" ] && echo "$plugin_url: HEAD is detached, skipping" && continue
+    [ -z "$branch" ] && __miniplug_warning "$plugin_url: HEAD is detached, skipping" && continue
 
     # Check the difference between remote and local branches
     diffs="$(git -C "$plugin_location" diff "$remote/$branch")"
 
     if [ -n "$diffs" ]; then
       # Pull!
-      git -C "$plugin_location" pull -q "$remote" "$branch" && echo "$plugin_url successfully updated!"
+      git -C "$plugin_location" pull -q "$remote" "$branch" && __miniplug_success "$plugin_url successfully updated!"
     else
-      echo "$plugin_url is up-to-date!"
+      __miniplug_warning "$plugin_url is already up-to-date!"
     fi
   done
 }
@@ -148,14 +160,14 @@ function __miniplug_load() {
 
   for plugin_url in ${MINIPLUG_PLUGINS[*]}; do
     # Get plugin name (last two URL segments)
-    plugin_name="$(echo "$plugin_url" | awk -F '/' '{ print $(NF - 1) "/" $NF }')"
+    plugin_name="$(printf "$plugin_url" | awk -F '/' '{ print $(NF - 1) "/" $NF }')"
 
     # Where this plugin is located
     plugin_location="$MINIPLUG_HOME/$plugin_name"
 
     # Check if plugin is installed
     if [ ! -d "$plugin_location" ]; then
-      echo "$plugin_url is not installed, run 'miniplug install' to install it"
+      __miniplug_warning "$plugin_url is not installed, run 'miniplug install' to install it"
       continue
     fi
 
@@ -196,9 +208,9 @@ function __miniplug_load() {
 
     # If none of sources has been found
     if [ "$MINIPLUG_THEME" = "$plugin_url" ]; then
-      echo "No .zsh-theme, .plugin.zsh or .zsh file found, most likely, $plugin_url is not a valid ZSH theme"
+      __miniplug_error "No .zsh-theme, .plugin.zsh or .zsh file found, most likely, $plugin_url is not a valid ZSH theme"
     else
-      echo "No .plugin.zsh or .zsh file found, most likely, $plugin_url is not a valid ZSH plugin"
+      __miniplug_error "No .plugin.zsh or .zsh file found, most likely, $plugin_url is not a valid ZSH plugin"
     fi
   done
 }
