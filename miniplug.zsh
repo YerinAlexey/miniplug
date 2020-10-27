@@ -91,7 +91,7 @@ function __miniplug_install() {
 
     # Get URL for git clone
     clone_url="$(printf "$plugin_url" | awk -F '/' '{
-      if (match($0, /^https:\/\//)) {
+      if (match($0, /^(git|https?):\/\//)) {
         print $0
       } else {
         print "https://github.com/" $0
