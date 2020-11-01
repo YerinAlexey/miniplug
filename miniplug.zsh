@@ -41,6 +41,24 @@ function __miniplug_check_loaded() {
 
   return 1
 }
+
+# Resolve URL shorthand
+# user/repo -> https://github.com/user/repo
+function __miniplug_resolve_url() {
+  printf "$1" | awk -F '/' '{
+    if (match($0, /^(git|https?):\/\//)) {
+      print $0
+    } else {
+      print "https://github.com/" $0
+    }
+  }'
+}
+
+# Get last two URL path segments
+# https://github.com/user/repo -> user/repo
+function __miniplug_get_plugin_name() {
+  printf "$1" | awk -F '/' '{ print $(NF - 1) "/" $NF }'
+}
 # }}}
 
 # Core functions {{{
@@ -89,16 +107,10 @@ function __miniplug_install() {
 
   for plugin_url in ${MINIPLUG_PLUGINS[*]}; do
     # Get plugin name (last two URL segments)
-    plugin_name="$(printf "$plugin_url" | awk -F '/' '{ print $(NF - 1) "/" $NF }')"
+    plugin_name="$(__miniplug_get_plugin_name "$plugin_url")"
 
     # Get URL for git clone
-    clone_url="$(printf "$plugin_url" | awk -F '/' '{
-      if (match($0, /^(git|https?):\/\//)) {
-        print $0
-      } else {
-        print "https://github.com/" $0
-      }
-    }')"
+    clone_url="$(__miniplug_resolve_url "$plugin_url")"
 
     # Where to clone this plugin
     clone_dest="$MINIPLUG_HOME/$plugin_name"
@@ -127,7 +139,7 @@ function __miniplug_update() {
 
   for plugin_url in ${MINIPLUG_PLUGINS[*]}; do
     # Get plugin name (last two URL segments)
-    plugin_name="$(printf "$plugin_url" | awk -F '/' '{ print $(NF - 1) "/" $NF }')"
+    plugin_name="$(__miniplug_get_plugin_name "$plugin_url")"
 
     # Where plugin is located
     plugin_location="$MINIPLUG_HOME/$plugin_name"
@@ -162,7 +174,7 @@ function __miniplug_load() {
 
   for plugin_url in ${MINIPLUG_PLUGINS[*]}; do
     # Get plugin name (last two URL segments)
-    plugin_name="$(printf "$plugin_url" | awk -F '/' '{ print $(NF - 1) "/" $NF }')"
+    plugin_name="$(__miniplug_get_plugin_name "$plugin_url")"
 
     # Where this plugin is located
     plugin_location="$MINIPLUG_HOME/$plugin_name"
