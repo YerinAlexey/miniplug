@@ -4,12 +4,12 @@ Minimalistic plugin manager for ZSH.
 It was developed as a drop-in replacement for [zplug](https://github.com/zplug/zplug) and [Antigen](https://github.com/zsh-users/antigen). They both have serious problems and are not maintained anymore.
 The suggested [Antibody](https://github.com/getantibody/antibody) is just weird, why would we need a native language like Go to write a plugin manager for the shell?
 
-## Features
+# Features
 - No crashes or double plugin loading when re-sourcing `.zshrc`
 - Unlike [Antigen](https://github.com/zsh-users/antigen), Miniplug does not pollute your `$PATH`
 - Only bare minimum for managing plugins
 
-## Requirements
+# Requirements
 - ZSH
 - Git
 - `awk` (`gawk`)
