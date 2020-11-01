@@ -71,4 +71,4 @@ git checkout "$(git log --format=%H | head -1)"
 After that, plugin will be skipped when you run `miniplug update`
 
 # License
-MIT, [learn more](./LICENSE)
+[Apache 2.0](./LICENSE)
