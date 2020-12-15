@@ -14,13 +14,19 @@ declare MINIPLUG_PLUGINS=()
 # Helper functions {{{
 # Loggers
 function __miniplug_success() {
-  printf '\x1b[32m%s\x1b[0m\n' "$1"
+  fmt="$1"
+  shift 1
+  printf "\x1b[32m$fmt\x1b[0m\n" "$@"
 }
 function __miniplug_warning() {
-  printf '[warn] \x1b[33m%s\x1b[0m\n' "$1"
+  fmt="$1"
+  shift 1
+  printf "[warn] \x1b[33m$fmt\x1b[0m\n" "$@"
 }
 function __miniplug_error() {
-  printf '[err] \x1b[31m%s\x1b[0m\n' "$1"
+  fmt="$1"
+  shift 1
+  printf "[err] \x1b[31m$fmt\x1b[0m\n" "$@"
 }
 
 # Friendly wrapper around find
@@ -117,14 +123,14 @@ function __miniplug_install() {
 
     # Check if plugin is already installed
     if [ -d "$clone_dest" ]; then
-      __miniplug_warning "$plugin_url is already installed, skipping"
+      __miniplug_warning "%s is already installed, skipping" "$plugin_url"
       continue
     fi
 
     # Clone
     printf 'Installing %s ...\n' "$plugin_url"
     git clone "$clone_url" "$clone_dest" -q --depth 1 || (
-      __miniplug_error "Failed to install $plugin_url, exiting"
+      __miniplug_error "Failed to install %s, exiting" "$plugin_url"
       return 1
     )
   done
@@ -151,16 +157,16 @@ function __miniplug_update() {
     branch="$(git -C "$plugin_location" branch --show-current)"
     remote="$(git -C "$plugin_location" remote show)"
 
-    [ -z "$branch" ] && __miniplug_warning "$plugin_url: HEAD is detached, skipping" && continue
+    [ -z "$branch" ] && __miniplug_warning "%s: HEAD is detached, skipping" "$plugin_url" && continue
 
     # Check the difference between remote and local branches
     diffs="$(git -C "$plugin_location" diff "$remote/$branch")"
 
     if [ -n "$diffs" ]; then
       # Pull!
-      git -C "$plugin_location" pull -q "$remote" "$branch" && __miniplug_success "$plugin_url successfully updated!"
+      git -C "$plugin_location" pull -q "$remote" "$branch" && __miniplug_success "%s successfully updated!" "$plugin_url"
     else
-      __miniplug_warning "$plugin_url is already up-to-date!"
+      __miniplug_warning "%s is already up-to-date!" "$plugin_url"
     fi
   done
 }
@@ -181,7 +187,7 @@ function __miniplug_load() {
 
     # Check if plugin is installed
     if [ ! -d "$plugin_location" ]; then
-      __miniplug_warning "$plugin_url is not installed, run 'miniplug install' to install it"
+      __miniplug_warning "%s is not installed, run 'miniplug install' to install it" "$plugin_url"
       continue
     fi
 
@@ -222,9 +228,9 @@ function __miniplug_load() {
 
     # If none of sources has been found
     if [ "$MINIPLUG_THEME" = "$plugin_url" ]; then
-      __miniplug_error "No .zsh-theme, .plugin.zsh or .zsh file found, most likely, $plugin_url is not a valid ZSH theme"
+      __miniplug_error "No .zsh-theme, .plugin.zsh or .zsh file found, most likely, %s is not a valid ZSH theme" "$plugin_url"
     else
-      __miniplug_error "No .plugin.zsh or .zsh file found, most likely, $plugin_url is not a valid ZSH plugin"
+      __miniplug_error "No .plugin.zsh or .zsh file found, most likely, %s is not a valid ZSH plugin" "$plugin_url"
     fi
   done
 }
