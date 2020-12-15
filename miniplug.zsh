@@ -14,13 +14,13 @@ declare MINIPLUG_PLUGINS=()
 # Helper functions {{{
 # Loggers
 function __miniplug_success() {
-  printf "\x1b[32m$1\x1b[0m\n"
+  printf '\x1b[32m%s\x1b[0m\n' "$1"
 }
 function __miniplug_warning() {
-  printf "[warn] \x1b[33m$1\x1b[0m\n"
+  printf '[warn] \x1b[33m%s\x1b[0m\n' "$1"
 }
 function __miniplug_error() {
-  printf "[err] \x1b[31m$1\x1b[0m\n"
+  printf '[err] \x1b[31m%s\x1b[0m\n' "$1"
 }
 
 # Friendly wrapper around find
@@ -45,7 +45,7 @@ function __miniplug_check_loaded() {
 # Resolve URL shorthand
 # user/repo -> https://github.com/user/repo
 function __miniplug_resolve_url() {
-  printf "$1" | awk -F '/' '{
+  printf '%s' "$1" | awk -F '/' '{
     if (match($0, /^(git|https?):\/\//)) {
       print $0
     } else {
@@ -57,7 +57,7 @@ function __miniplug_resolve_url() {
 # Get last two URL path segments
 # https://github.com/user/repo -> user/repo
 function __miniplug_get_plugin_name() {
-  printf "$1" | awk -F '/' '{ print $(NF - 1) "/" $NF }'
+  printf '%s' "$1" | awk -F '/' '{ print $(NF - 1) "/" $NF }'
 }
 # }}}
 
@@ -122,7 +122,7 @@ function __miniplug_install() {
     fi
 
     # Clone
-    printf "Installing $plugin_url ...\n"
+    printf 'Installing %s ...\n' "$plugin_url"
     git clone "$clone_url" "$clone_dest" -q --depth 1 || (
       __miniplug_error "Failed to install $plugin_url, exiting"
       return 1
