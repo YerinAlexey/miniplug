@@ -166,7 +166,7 @@ function __miniplug_update() {
       # Pull!
       git -C "$plugin_location" pull -q "$remote" "$branch" && __miniplug_success "%s has been successfully updated!" "$plugin_url"
     else
-      __miniplug_warning "%s is already up-to-date!" "$plugin_url"
+      __miniplug_warning "%s is up-to-date!" "$plugin_url"
     fi
   done
 }
