@@ -164,7 +164,7 @@ function __miniplug_update() {
 
     if [ -n "$diffs" ]; then
       # Pull!
-      git -C "$plugin_location" pull -q "$remote" "$branch" && __miniplug_success "%s successfully updated!" "$plugin_url"
+      git -C "$plugin_location" pull -q "$remote" "$branch" && __miniplug_success "%s has been successfully updated!" "$plugin_url"
     else
       __miniplug_warning "%s is already up-to-date!" "$plugin_url"
     fi
