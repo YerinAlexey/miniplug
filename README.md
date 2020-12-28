@@ -20,12 +20,12 @@ To install Miniplug you need to download [`miniplug.zsh`](./miniplug.zsh) file a
 curl \
   -sL --create-dirs \
   https://git.sr.ht/~yerinalexey/miniplug/blob/master/miniplug.zsh \
-  -o $HOME/.miniplug/miniplug.zsh
+  -o $HOME/.local/share/miniplug.zsh
 
 # Add to zshrc:
-source "$HOME/.miniplug/miniplug.zsh"
+source "$HOME/.local/share/miniplug.zsh"
 ```
-> You can download this file anywhere, `$HOME/.miniplug/miniplug.zsh` is just an example
+> You can download this file anywhere, `$HOME/.local/share/miniplug.zsh` is just an example
 
 # Usage
 After `miniplug.zsh` file is sourced, you'll get access to `miniplug` CLI
@@ -38,7 +38,7 @@ source them using `miniplug load` (should be added to `.zshrc`).
 
 ## Example `.zshrc`:
 ```sh
-source "$HOME/.miniplug/miniplug.zsh"
+source "$HOME/.local/share/miniplug.zsh"
 
 # Define a plugin
 miniplug plugin 'zsh-users/zsh-syntax-highlighting'
