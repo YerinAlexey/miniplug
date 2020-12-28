@@ -95,7 +95,7 @@ function __miniplug_theme() {
   # current, that's fine. Otherwise it will error out when reloading
   # .zshrc
   if [ -n "$MINIPLUG_THEME" ] && [ "$MINIPLUG_THEME" != "$theme_url" ]; then
-    __miniplug_error "Theme is already set"
+    __miniplug_error 'Theme is already set'
     return 1
   fi
 
@@ -120,13 +120,13 @@ function __miniplug_install() {
     # Skip plugin if destination already exists
     # TODO: Maybe add -f option to reinstall such plugins?
     if [ -d "$clone_dest" ]; then
-      __miniplug_warning "%s is already installed, skipping" "$plugin_url"
+      __miniplug_warning '%s is already installed, skipping' "$plugin_url"
       continue
     fi
 
     printf 'Installing %s ...\n' "$plugin_url"
     git clone "$clone_url" "$clone_dest" -q --depth 1 || (
-      __miniplug_error "Failed to install %s, exiting" "$plugin_url"
+      __miniplug_error 'Failed to install %s, exiting' "$plugin_url"
       return 1
     )
   done
@@ -151,16 +151,16 @@ function __miniplug_update() {
     # If HEAD is detached merge will fail, so will just skip that plugin
     # when a warning. Also this can be used to force some plugins to
     # stay on a single version
-    [ -z "$branch" ] && __miniplug_warning "%s: HEAD is detached, skipping" "$plugin_url" && continue
+    [ -z "$branch" ] && __miniplug_warning '%s: HEAD is detached, skipping' "$plugin_url" && continue
 
     # Diff current branch with the remote one to see if there're any
     # updates
     diffs="$(git -C "$plugin_location" diff "$remote/$branch")"
 
     if [ -n "$diffs" ]; then
-      git -C "$plugin_location" pull -q "$remote" "$branch" && __miniplug_success "%s has been successfully updated!" "$plugin_url"
+      git -C "$plugin_location" pull -q "$remote" "$branch" && __miniplug_success '%s has been successfully updated!' "$plugin_url"
     else
-      __miniplug_warning "%s is up-to-date!" "$plugin_url"
+      __miniplug_warning '%s is up-to-date!' "$plugin_url"
     fi
   done
 }
@@ -178,7 +178,7 @@ function __miniplug_load() {
 
     # Notify user if plugin is not installed yet
     if [ ! -d "$plugin_location" ]; then
-      __miniplug_warning "%s is not installed, run 'miniplug install' to install it" "$plugin_url"
+      __miniplug_warning '%s is not installed, run `miniplug install` to install it' "$plugin_url"
       continue
     fi
 
@@ -221,9 +221,9 @@ function __miniplug_load() {
     # Throw an error if none of sources has been found so user will know
     # that something went wrong with the downloaded plugin
     if [ "$MINIPLUG_THEME" = "$plugin_url" ]; then
-      __miniplug_error "No .zsh-theme, .plugin.zsh or .zsh file found, most likely, %s is not a valid ZSH theme" "$plugin_url"
+      __miniplug_error 'No .zsh-theme, .plugin.zsh or .zsh file found, most likely, %s is not a valid ZSH theme' "$plugin_url"
     else
-      __miniplug_error "No .plugin.zsh or .zsh file found, most likely, %s is not a valid ZSH plugin" "$plugin_url"
+      __miniplug_error 'No .plugin.zsh or .zsh file found, most likely, %s is not a valid ZSH plugin' "$plugin_url"
     fi
   done
 }
