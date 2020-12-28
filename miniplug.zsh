@@ -5,7 +5,7 @@
 # Copyright 2020 Alexey Yerin
 
 # Globals
-declare MINIPLUG_HOME="${MINIPLUG_HOME:-$HOME/.miniplug}"
+declare MINIPLUG_HOME="${MINIPLUG_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/miniplug}"
 declare MINIPLUG_THEME="${MINIPLUG_THEME:-}"
 declare MINIPLUG_PLUGINS=()
 

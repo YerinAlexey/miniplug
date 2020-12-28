@@ -51,10 +51,11 @@ miniplug load
 ```
 
 ## Changing plugin folder
-Plugins will be downloaded to `~/.miniplug` by default, to change that
-location, set `MINIPLUG_HOME` environment variable with a new path:
+Plugins will be downloaded to `$XDG_DATA_HOME/miniplug` (or `~/.local/share/miniplug` if not set)
+by default. To change that location, set `MINIPLUG_HOME` environment variable
+to a new path:
 ```sh
-export MINIPLUG_HOME="$HOME/.local/share/miniplug"
+export MINIPLUG_HOME="$HOME/.config/zsh/plugins"
 ```
 
 ## Updating plugins
