@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/bin/zsh
 
 # Miniplug - minimalistic plugin manager for ZSH
 
