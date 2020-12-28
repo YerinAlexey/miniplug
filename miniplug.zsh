@@ -9,7 +9,6 @@ declare MINIPLUG_PLUGINS=()
 
 [ -z "$MINIPLUG_LOADED_PLUGINS" ] && declare MINIPLUG_LOADED_PLUGINS=()
 
-# Helper functions {{{
 # Loggers
 function __miniplug_success() {
   fmt="$1"
@@ -63,22 +62,22 @@ function __miniplug_resolve_url() {
 function __miniplug_get_plugin_name() {
   printf '%s' "$1" | awk -F '/' '{ print $(NF - 1) "/" $NF }'
 }
-# }}}
 
-# Core functions {{{
 # Show help message
 function __miniplug_usage() {
-  echo "Miniplug - minimalistic plugin manager for ZSH"
-  echo "Usage: miniplug <command> [arguments]"
-  echo "Commands:"
-  echo "  plugin <source> - Register a plugin"
-  echo "  theme <source> - Register a theme (can be done only once)"
-  echo "  install - Install plugins"
-  echo "  update - Update plugins"
-  echo "  help - Show this message"
-  echo "About <source>:"
-  echo "  <source> can be either full URL to Git repository or Github's user/repo"
-  echo "  Examples: https://gitlab.com/user/repo, zsh-users/repo (expanded to https://github.com/zsh-users/repo)"
+  cat <<EOF
+Miniplug - minimalistic plugin manager for ZSH
+Usage: miniplug <command> [arguments]
+Commands:
+  plugin <source> - Register a plugin
+  theme <source> - Register a theme (can be done only once)
+  install - Install plugins
+  update - Update plugins
+  help - Show this message
+About <source>:
+  <source> can be either full URL to Git repository or Github's user/repo
+  Examples: https://gitlab.com/user/repo, zsh-users/repo (expanded to https://github.com/zsh-users/repo)
+EOF
 }
 
 # Register a plugin
@@ -92,7 +91,9 @@ function __miniplug_plugin() {
 function __miniplug_theme() {
   local theme_url="$1"
 
-  # Throw an error if theme is already set but not if MINIPLUG_THEME and new theme match
+  # Throw an error if theme is already set. If it new theme matches the
+  # current, that's fine. Otherwise it will error out when reloading
+  # .zshrc
   if [ -n "$MINIPLUG_THEME" ] && [ "$MINIPLUG_THEME" != "$theme_url" ]; then
     __miniplug_error "Theme is already set"
     return 1
@@ -110,22 +111,19 @@ function __miniplug_install() {
   mkdir -p "$MINIPLUG_HOME"
 
   for plugin_url in ${MINIPLUG_PLUGINS[*]}; do
-    # Get plugin name (last two URL segments)
     plugin_name="$(__miniplug_get_plugin_name "$plugin_url")"
 
-    # Get URL for git clone
+    # Because URL is not always full, we need to resolve it first
     clone_url="$(__miniplug_resolve_url "$plugin_url")"
-
-    # Where to clone this plugin
     clone_dest="$MINIPLUG_HOME/$plugin_name"
 
-    # Check if plugin is already installed
+    # Skip plugin if destination already exists
+    # TODO: Maybe add -f option to reinstall such plugins?
     if [ -d "$clone_dest" ]; then
       __miniplug_warning "%s is already installed, skipping" "$plugin_url"
       continue
     fi
 
-    # Clone
     printf 'Installing %s ...\n' "$plugin_url"
     git clone "$clone_url" "$clone_dest" -q --depth 1 || (
       __miniplug_error "Failed to install %s, exiting" "$plugin_url"
@@ -142,26 +140,24 @@ function __miniplug_update() {
   mkdir -p "$MINIPLUG_HOME"
 
   for plugin_url in ${MINIPLUG_PLUGINS[*]}; do
-    # Get plugin name (last two URL segments)
     plugin_name="$(__miniplug_get_plugin_name "$plugin_url")"
-
-    # Where plugin is located
     plugin_location="$MINIPLUG_HOME/$plugin_name"
 
-    # Pull changes from remote
     git -C "$plugin_location" remote update >/dev/null
 
-    # Get current branch and remote
     branch="$(git -C "$plugin_location" branch --show-current)"
     remote="$(git -C "$plugin_location" remote show)"
 
+    # If HEAD is detached merge will fail, so will just skip that plugin
+    # when a warning. Also this can be used to force some plugins to
+    # stay on a single version
     [ -z "$branch" ] && __miniplug_warning "%s: HEAD is detached, skipping" "$plugin_url" && continue
 
-    # Check the difference between remote and local branches
+    # Diff current branch with the remote one to see if there're any
+    # updates
     diffs="$(git -C "$plugin_location" diff "$remote/$branch")"
 
     if [ -n "$diffs" ]; then
-      # Pull!
       git -C "$plugin_location" pull -q "$remote" "$branch" && __miniplug_success "%s has been successfully updated!" "$plugin_url"
     else
       __miniplug_warning "%s is up-to-date!" "$plugin_url"
@@ -177,19 +173,17 @@ function __miniplug_load() {
   mkdir -p "$MINIPLUG_HOME"
 
   for plugin_url in ${MINIPLUG_PLUGINS[*]}; do
-    # Get plugin name (last two URL segments)
     plugin_name="$(__miniplug_get_plugin_name "$plugin_url")"
-
-    # Where this plugin is located
     plugin_location="$MINIPLUG_HOME/$plugin_name"
 
-    # Check if plugin is installed
+    # Notify user if plugin is not installed yet
     if [ ! -d "$plugin_location" ]; then
       __miniplug_warning "%s is not installed, run 'miniplug install' to install it" "$plugin_url"
       continue
     fi
 
-    # Check if plugin is already loaded
+    # Skip if plugin is already loaded, prevents some plugins from
+    # breaking after sourcing them twice
     __miniplug_check_loaded "$plugin_url" && continue
 
     # 1st source - .plugin.zsh file
@@ -224,7 +218,8 @@ function __miniplug_load() {
       fi
     fi
 
-    # If none of sources has been found
+    # Throw an error if none of sources has been found so user will know
+    # that something went wrong with the downloaded plugin
     if [ "$MINIPLUG_THEME" = "$plugin_url" ]; then
       __miniplug_error "No .zsh-theme, .plugin.zsh or .zsh file found, most likely, %s is not a valid ZSH theme" "$plugin_url"
     else
@@ -232,9 +227,7 @@ function __miniplug_load() {
     fi
   done
 }
-# }}}
 
-# Wrapper command for core functions
 function miniplug() {
   case "$1" in
     plugin) __miniplug_plugin "$2" ;;
