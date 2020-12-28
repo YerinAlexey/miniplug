@@ -1,8 +1,6 @@
 #!/usr/bin/env zsh
 
 # Miniplug - minimalistic plugin manager for ZSH
-#
-# Copyright 2020 Alexey Yerin
 
 # Globals
 declare MINIPLUG_HOME="${MINIPLUG_HOME:-${XDG_DATA_HOME:-$HOME/.local/share}/miniplug}"
