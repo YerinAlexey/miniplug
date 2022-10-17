@@ -31,7 +31,7 @@ function __miniplug_find() {
   local searchdir="$1"
   local searchterm="$2"
 
-  find "$searchdir" -maxdepth 1 -type f -name "$searchterm" | head -n 1
+  find -L "$searchdir" -maxdepth 1 -type f -name "$searchterm" | head -n 1
 }
 
 # Check if plugin is already loaded
